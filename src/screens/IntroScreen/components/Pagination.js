@@ -2,7 +2,7 @@ import React from "react";
 import { Animated, Dimensions, StyleSheet, View } from "react-native";
 import PropTypes from "prop-types";
 
-import Colors from '../../../utils/Colors';
+import Colors from '../../../../utils/Colors';
 
 const {height, width} = Dimensions.get('window');
 
