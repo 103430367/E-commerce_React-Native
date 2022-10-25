@@ -1,3 +1,5 @@
+//need image
+
 const slides = [
     {
         id: 1,

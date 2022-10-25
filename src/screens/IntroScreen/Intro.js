@@ -1,3 +1,5 @@
+//still lacks reducers and state management
+
 import React from "react";
 import { Animated, Dimensions, Platform, StatusBar, StyleSheet, View } from "react-native";
 
