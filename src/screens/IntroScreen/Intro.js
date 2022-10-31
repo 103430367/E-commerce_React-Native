@@ -1,19 +1,62 @@
-//still lacks reducers and state management
-
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Platform, StatusBar, StyleSheet, View } from "react-native";
+import { useDispatch } from "react-redux";
+import * as CheckFirstTimeAction from "../../reducers/product/checkFirstTimeActions";
 
 import { Pagination, Slide, SubSlide, Ticker } from "./components";
 import slides from "../../db/IntroSlides";
+//import Loader
 
 const { width, height } = Dimensions.get('window');
 
 export const IntroScreen = () => {
+    const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false);
+    const scrollX = useRef(new Animated.Value(0)).current;
+    const scrollClick = useRef(null);
+    const unmounted = useRef(false);
+    useEffect(() => {
+        return () => {
+            unmounted.current = true;
+        };
+    }, []);
+    const backgroundColor = scrollX.interpolate({
+        inputRange: [0, width, width * 2],
+        outputRange: ['#BFEAF5', '#BEECC4','#FFE4D9'],
+        extrapolate: 'clamp',
+    });
+    const textTranslate = scrollX.interpolate({
+        inputRange: [0, width, width * 2],
+        outputRange: [0, width * -1, width * -2],
+        extrapolate:'clamp',
+    });
+
+    const EnterApp = async () => {
+        setLoading(true);
+        await dispatch(CheckFirstTimeAction.firstOpen());
+        if(!unmounted.current) {
+            setLoading(false);
+        }
+    };
+
     return (
         <View style = {styles.container}>
             <Animated.View style = {[styles.slider, {backgroundColor}]}>
-                {/* <Ticker /> */}
-                <Animated.ScrollView>
+                <Ticker scrollX={scrollX}/>
+                <Animated.ScrollView
+                    ref={scrollClick}
+                    horizontal
+                    snapToInterval={width}
+                    scrollTo={{ x: scrollClick, animated: true}}
+                    decelerationRate='fast'
+                    showsHorizontalScrollIndicator={false}
+                    bounces={false}
+                    scrollEventThrottle={1}
+                    onScroll={Animated.event(
+                        [{nativeEvent: {contentOffset: {x: scrollX}}}],
+                        {useNativeDriver: false}
+                    )}
+                >
                     {slides.map((slide) => {
                         return <Slide key={slide.id} imgUrl={slide.imgUrl} />
                     })}
@@ -21,7 +64,7 @@ export const IntroScreen = () => {
             </Animated.View>
             <View style = {styles.footer}>
                 <Pagination slides={slides} 
-                // scrollX 
+                    scrollX={scrollX}
                 />
                 <Animated.View 
                     style = {[StyleSheet.absoluteFillObject, { backgroundColor}]}>
@@ -30,18 +73,22 @@ export const IntroScreen = () => {
                     <Animated.View style = {{
                         flexDirection: 'row',
                         width: width * slides.length,
-                        // transform: [{translateX: textTranslate}]
+                        transform: [{translateX: textTranslate}]
                     }}>
                         {slides.map(({subtitle, description}, index) => {
                             return (
                                 <SubSlide
                                 key = {subtitle}
                                 last = {index === slides.length - 1}
-                                // enterApp = {EnterApp}
+                                enterApp = {EnterApp}
                                 subtitle = {subtitle}
                                 description = {description}
-                                // scrollX = {scrollX}
-                                // nextSlide = {() => {}}
+                                scrollX = {scrollX}
+                                nextSlide = {() => {
+                                    if (scrollClick.current) {
+                                        scrollClick.current.scrollTo({ x: width * (index + 1) });
+                                      }
+                                }}
                                 />
                             );
                         })}

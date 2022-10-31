@@ -1,8 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import Colors from "../../../../utils/Colors";
-import CustomText from "../../../../components/UI/CustomText";
+import Colors from "../../../utils/Colors";
+import CustomText from "../../../components/UI/CustomText";
 
 export const SubSlide = ({ subtitle, description, last, nextSlide, enterApp}) => {
     const bgColor = last ? "#2CB9B0" : "rgba(12,13,52,0.05)";
