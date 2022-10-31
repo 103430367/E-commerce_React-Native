@@ -25,7 +25,8 @@
     "react-redux": "^8.0.4",
     "redux": "^4.2.0",
     "redux-form": "^8.3.8",
-    "redux-thunk": "^2.4.1"
+    "redux-thunk": "^2.4.1",
+    "expo-app-loading": "~2.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

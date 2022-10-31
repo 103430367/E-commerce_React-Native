@@ -26,8 +26,12 @@ import {Login as LoginAction} from "../../../reducers";
 import PropTypes from "prop-types";
 import renderField from "./RenderField";
 //Authentication for Touch/Face ID - not added
+// import * as LocalAuthentication from 'expo-local-authentication';
+// import * as SecureStore from 'expo-secure-store';
+// import { secretKey } from '../../../utils/Config';
 
 const { height } = Dimensions.get('window');
+
 //Validation
 const validate = (values) => {
     const errors = {};
@@ -50,12 +54,50 @@ const Login = (props) => {
     const [ showPass, setShowPass ] = useState(false);
     const auth = useSelector((state) => state.auth);
     const [ loading, setLoading ] = useState(false);
-    // const scanFingerprintorFaceId = async() => {
-    //     if (resData === null) {
-    //         return alert("You have to enable LOGIN by touch/Face Id");
-    //     }
-    //     //Authetication
-    // } 
+    const scanFingerprintOrFaceId = async () => {
+        const resData = await SecureStore.getItemAsync(secretKey);
+        if (resData === null) {
+            return alert('You have to enable LOGIN by touch/face ID');
+        }
+        const result = await LocalAuthentication.authenticateAsync({
+            promptMessage: 'Authenticating',
+        });
+        if (result.success) {
+            const data = await JSON.parse(resData);
+            dispatch(LoginAction(data.email, data.password));
+        }
+    };
+    
+    const showAndroidAlert = () => {
+        Alert.alert(
+            'Fingerprint Scan',
+            'Place your finger over the touch sensor and press scan.',
+            [
+                {
+                    text: 'Scan',
+                    onPress: () => {
+                        scanFingerprintOrFaceId();
+                    },
+                },
+                {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel'),
+                    style: 'cancel',
+                },
+            ],
+        );
+    };
+    
+    const submit = async (values) => {
+        try {
+          setLoading(true);
+          await dispatch(LoginAction(values.email, values.password));
+          props.navigation.navigate('Home');
+        } catch (err) {
+          setLoading(false);
+          alert(err);
+        }
+    };
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'position' : 'height'}>
             <TouchableOpacity
@@ -130,9 +172,15 @@ const Login = (props) => {
                         Or Sign in with FaceId/Fingerprint
                     </CustomText>
                     <View style={styles.circleImage}>
-                        <TouchableOpacity> 
-                            <Image /> 
-                            {/* authenticate */}
+                        <TouchableOpacity
+                            onPress={
+                                Platform.OS === 'android' ? showAndroidAlert : scanFingerprintOrFaceId
+                            }
+                        > 
+                            <Image 
+                                source={require('../../../assets/Images/faceid.png')}
+                                style={styles.faceid}
+                            /> 
                         </TouchableOpacity>
                     </View>
                 </View>
