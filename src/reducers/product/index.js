@@ -1,3 +1,3 @@
-export * from "./checkFirstTimeActions";
 export * from "./productActions";
-export * from "./producReducer";
+export * from "./productReducer";
+export * from "./checkFirstTimeActions";
